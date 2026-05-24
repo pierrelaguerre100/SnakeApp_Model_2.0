@@ -6,7 +6,7 @@ public class DatabaseSnakeGame {
     //database information
     private static final String URL = "jdbc:mysql://localhost:3306/snakegame";
     private static final String USER = "root";
-    private static final String PASSWORD = "ComputerScience380";
+    private static final String PASSWORD = "cs380";
 
     //connect to database
     public void connect() {
