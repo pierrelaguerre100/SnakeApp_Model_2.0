@@ -6,31 +6,38 @@ import java.awt.*;
 
 public class MenuWindowPanel extends JPanel {
 
+    // Title labels for the menu screen
     private JLabel titleLabel;
     private JLabel subtitleLabel;
 
+    // Login input fields
     private JLabel usernameLabel;
     private JTextField usernameField;
 
     private JLabel passwordLabel;
     private JPasswordField passwordField;
 
+    // Difficulty selection
     private JLabel difficultyLabel;
     private JComboBox<String> difficultyBox;
 
+    // Main menu buttons
     private JButton loginButton;
     private JButton signUpButton;
     private JButton leaderboardButton;
     private JButton newGameButton;
     private JButton playButton;
 
+    // Frame and board size are stored so we can switch screens later
     private JFrame frame;
     private int boardWidth;
     private int boardHeight;
 
+    // Keeps track of the user after a successful login
     private int currentUserId = -1;
     private String currentUsername = "";
 
+    // Colors used for the retro menu style
     private final Color backgroundColor = new Color(5, 20, 5);
     private final Color panelColor = new Color(10, 35, 10);
     private final Color neonGreen = new Color(75, 255, 75);
@@ -45,11 +52,13 @@ public class MenuWindowPanel extends JPanel {
         this.boardWidth = boardWidth;
         this.boardHeight = boardHeight;
 
+        // Main panel setup
         setPreferredSize(new Dimension(boardWidth, boardHeight));
         setLayout(new BorderLayout());
         setBackground(backgroundColor);
         setBorder(new EmptyBorder(14, 18, 14, 18));
 
+        // Inner panel creates the green border around the menu
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setBackground(panelColor);
@@ -64,6 +73,7 @@ public class MenuWindowPanel extends JPanel {
 
         add(mainPanel, BorderLayout.CENTER);
 
+        // Adds button actions after all buttons are created
         connectButtons();
     }
 
@@ -100,6 +110,7 @@ public class MenuWindowPanel extends JPanel {
         gbc.insets = new Insets(3, 8, 3, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Username label and input box
         usernameLabel = createRetroLabel("USERNAME");
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -112,6 +123,7 @@ public class MenuWindowPanel extends JPanel {
         gbc.gridwidth = 2;
         inputPanel.add(usernameField, gbc);
 
+        // Password label and input box
         passwordLabel = createRetroLabel("PASSWORD");
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -124,6 +136,7 @@ public class MenuWindowPanel extends JPanel {
         gbc.gridwidth = 2;
         inputPanel.add(passwordField, gbc);
 
+        // Difficulty dropdown
         difficultyLabel = createRetroLabel("DIFFICULTY");
         gbc.gridx = 0;
         gbc.gridy = 4;
@@ -141,6 +154,7 @@ public class MenuWindowPanel extends JPanel {
         gbc.gridwidth = 2;
         inputPanel.add(difficultyBox, gbc);
 
+        // Login and sign up buttons
         loginButton = createRetroButton("LOGIN", darkGreen, Color.WHITE);
         loginButton.setPreferredSize(new Dimension(155, 36));
         gbc.gridx = 0;
@@ -155,6 +169,7 @@ public class MenuWindowPanel extends JPanel {
         gbc.gridwidth = 1;
         inputPanel.add(signUpButton, gbc);
 
+        // Leaderboard button opens the score table
         leaderboardButton = createRetroButton("LEADERBOARD", blue, Color.WHITE);
         leaderboardButton.setPreferredSize(new Dimension(330, 36));
         gbc.gridx = 0;
@@ -174,6 +189,7 @@ public class MenuWindowPanel extends JPanel {
         bottomPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 30, 0));
         bottomPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 
+        // Bottom game buttons
         newGameButton = createRetroButton("NEW GAME", purple, Color.WHITE);
         playButton = createRetroButton("PLAY", red, Color.WHITE);
 
@@ -236,10 +252,16 @@ public class MenuWindowPanel extends JPanel {
     }
 
     private void connectButtons() {
+        // Login checks the database for an existing user
         loginButton.addActionListener(e -> loginUser());
+
+        // Sign up creates a new user in the database
         signUpButton.addActionListener(e -> signUpUser());
+
+        // Leaderboard shows top scores from the database
         leaderboardButton.addActionListener(e -> showLeaderboard());
 
+        // Play starts the game if the user is logged in
         playButton.addActionListener(e -> {
             if (currentUserId == -1) {
                 JOptionPane.showMessageDialog(
@@ -254,6 +276,7 @@ public class MenuWindowPanel extends JPanel {
             openGame();
         });
 
+        // New Game also starts a fresh game for the logged in user
         newGameButton.addActionListener(e -> {
             if (currentUserId == -1) {
                 JOptionPane.showMessageDialog(
@@ -273,6 +296,7 @@ public class MenuWindowPanel extends JPanel {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
+        // Makes sure the user entered both fields
         if (username.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(
                     this,
@@ -290,6 +314,7 @@ public class MenuWindowPanel extends JPanel {
 
         db.disconnect();
 
+        // A valid user ID means login worked
         if (userId != -1) {
             currentUserId = userId;
             currentUsername = username;
@@ -317,6 +342,7 @@ public class MenuWindowPanel extends JPanel {
         String username = usernameField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
+        // Makes sure the user entered both fields
         if (username.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(
                     this,
@@ -370,6 +396,7 @@ public class MenuWindowPanel extends JPanel {
             }
         };
 
+        // Creates the leaderboard table
         JTable table = new JTable(model);
         table.setFont(new Font("Monospaced", Font.BOLD, 13));
         table.setRowHeight(28);
@@ -379,10 +406,12 @@ public class MenuWindowPanel extends JPanel {
         table.setSelectionBackground(new Color(20, 80, 20));
         table.setSelectionForeground(Color.WHITE);
 
+        // Styles the table header
         table.getTableHeader().setFont(new Font("Monospaced", Font.BOLD, 13));
         table.getTableHeader().setBackground(new Color(10, 60, 10));
         table.getTableHeader().setForeground(neonGreen);
 
+        // Centers the table text
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
         centerRenderer.setBackground(new Color(5, 20, 5));
@@ -427,6 +456,7 @@ public class MenuWindowPanel extends JPanel {
     private void openGame() {
         String selectedDifficulty = difficultyBox.getSelectedItem().toString();
 
+        // Opens the game screen and passes the logged in user's info
         SnakeGamePanel gamePanel = new SnakeGamePanel(
                 frame,
                 boardWidth,

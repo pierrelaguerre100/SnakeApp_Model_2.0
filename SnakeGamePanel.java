@@ -6,6 +6,7 @@ import javax.swing.*;
 
 public class SnakeGamePanel extends JPanel implements ActionListener, KeyListener {
 
+    // Tile represents one square on the game board
     private class Tile {
         int x;
         int y;
@@ -16,42 +17,55 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
         }
     }
 
+    // Different food types give different point values
     private enum FoodType {
         APPLE,
         ORANGE,
         STAR
     }
 
+    // Frame is used so the game can return back to the menu
     private JFrame frame;
 
+    // Board and grid information
     private int boardWidth;
     private int boardHeight;
     private int tileSize = 25;
 
+    // Snake information
     private Tile snakeHead;
     private ArrayList<Tile> snakeBody;
 
+    // Food information
     private Tile food;
     private FoodType currentFoodType;
     private Random random;
 
+    // Timer controls the game loop
     private Timer gameLoop;
+
+    // Direction values for snake movement
     private int velocityX;
     private int velocityY;
 
+    // Game state variables
     private boolean gameOver = false;
     private boolean paused = false;
     private boolean scoreSaved = false;
 
+    // Database object used to save the final score
     private DatabaseSnakeGame db;
 
+    // User information from the login screen
     private int userId;
     private String username;
 
+    // Score, level, and difficulty
     private int score = 0;
     private int level = 1;
     private String difficulty;
 
+    // Used to calculate how long the game lasted
     private long startTime;
 
     public SnakeGamePanel(int boardWidth, int boardHeight) {
@@ -85,10 +99,12 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private void startNewGame() {
+        // Stop the old timer if a game was already running
         if (gameLoop != null) {
             gameLoop.stop();
         }
 
+        // Close the old database connection before starting again
         if (db != null) {
             db.disconnect();
         }
@@ -96,16 +112,20 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
         db = new DatabaseSnakeGame();
         db.connect();
 
+        // Reset snake position
         snakeHead = new Tile(5, 5);
         snakeBody = new ArrayList<>();
 
+        // Create the first food
         food = new Tile(10, 10);
         chooseFoodType();
         placeFood();
 
+        // Snake starts still until the player presses an arrow key
         velocityX = 0;
         velocityY = 0;
 
+        // Reset score and game state
         score = 0;
         level = 1;
 
@@ -125,6 +145,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private int getStartingDelay() {
+        // Difficulty changes the starting speed
         if (difficulty.equalsIgnoreCase("Easy")) {
             return 130;
         } else if (difficulty.equalsIgnoreCase("Hard")) {
@@ -137,6 +158,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     private int getDelayForCurrentLevel() {
         int baseDelay = getStartingDelay();
 
+        // Higher levels make the snake move faster
         if (level == 1) {
             return baseDelay;
         } else if (level == 2) {
@@ -149,6 +171,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     private void chooseFoodType() {
         int chance = random.nextInt(100);
 
+        // Apple is most common, star is rarest
         if (chance < 60) {
             currentFoodType = FoodType.APPLE;
         } else if (chance < 90) {
@@ -159,6 +182,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private int getFoodPoints() {
+        // Returns how many points the current food is worth
         if (currentFoodType == FoodType.ORANGE) {
             return 2;
         } else if (currentFoodType == FoodType.STAR) {
@@ -201,6 +225,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private void drawGrid(Graphics g) {
+        // Draws the grid lines on the board
         for (int i = 0; i < boardWidth / tileSize; i++) {
             g.setColor(Color.DARK_GRAY);
             g.drawLine(i * tileSize, 0, i * tileSize, boardHeight);
@@ -212,6 +237,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
         int x = food.x * tileSize;
         int y = food.y * tileSize;
 
+        // Each food type has its own color or shape
         if (currentFoodType == FoodType.APPLE) {
             g.setColor(Color.RED);
             g.fillOval(x + 2, y + 2, tileSize - 4, tileSize - 4);
@@ -229,6 +255,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
         int[] xPoints = new int[points];
         int[] yPoints = new int[points];
 
+        // Creates a simple star shape
         for (int i = 0; i < points; i++) {
             double angle = Math.PI / 2 + i * Math.PI / 5;
             int radius = (i % 2 == 0) ? outerRadius : innerRadius;
@@ -241,6 +268,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private void drawSnake(Graphics g) {
+        // Draws the snake head and body
         g.setColor(Color.GREEN);
         g.fill3DRect(snakeHead.x * tileSize, snakeHead.y * tileSize, tileSize, tileSize, true);
 
@@ -250,6 +278,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private void drawTopDisplay(Graphics g) {
+        // Displays player name, score, level, and difficulty
         g.setFont(new Font("Arial", Font.BOLD, 18));
         g.setColor(Color.WHITE);
 
@@ -264,6 +293,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private void drawInstructions(Graphics g) {
+        // Shows the player controls at the bottom
         g.setFont(new Font("Arial", Font.PLAIN, 14));
         g.setColor(Color.LIGHT_GRAY);
 
@@ -287,6 +317,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private void drawGameOverMessage(Graphics g) {
+        // Shows the final score and restart/menu options
         g.setFont(new Font("Arial", Font.BOLD, 45));
         g.setColor(Color.RED);
 
@@ -328,14 +359,17 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private void placeFood() {
+        // Places food somewhere random on the board
         food.x = random.nextInt(boardWidth / tileSize);
         food.y = random.nextInt(boardHeight / tileSize);
 
+        // Prevents food from spawning on the snake head
         while (food.x == snakeHead.x && food.y == snakeHead.y) {
             food.x = random.nextInt(boardWidth / tileSize);
             food.y = random.nextInt(boardHeight / tileSize);
         }
 
+        // Prevents food from spawning on the snake body
         for (Tile snakePart : snakeBody) {
             if (food.x == snakePart.x && food.y == snakePart.y) {
                 placeFood();
@@ -349,10 +383,12 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private void move() {
+        // Snake does not move until the player presses an arrow key
         if (velocityX == 0 && velocityY == 0) {
             return;
         }
 
+        // Checks if the snake eats the food
         if (collision(snakeHead, food)) {
             snakeBody.add(new Tile(food.x, food.y));
 
@@ -363,6 +399,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
             placeFood();
         }
 
+        // Moves the snake body by following the previous part
         for (int i = snakeBody.size() - 1; i >= 0; i--) {
             Tile snakePart = snakeBody.get(i);
 
@@ -376,15 +413,18 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
             }
         }
 
+        // Moves the snake head
         snakeHead.x += velocityX;
         snakeHead.y += velocityY;
 
+        // Checks if the snake hits itself
         for (Tile snakePart : snakeBody) {
             if (collision(snakeHead, snakePart)) {
                 gameOver = true;
             }
         }
 
+        // Checks if the snake hits the wall
         if (snakeHead.x < 0 ||
                 snakeHead.x >= boardWidth / tileSize ||
                 snakeHead.y < 0 ||
@@ -396,6 +436,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     private void updateLevel() {
         int oldLevel = level;
 
+        // Level increases as the score gets higher
         if (score >= 15) {
             level = 3;
         } else if (score >= 7) {
@@ -410,10 +451,12 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private void updateGameSpeed() {
+        // Updates the timer delay when the level changes
         gameLoop.setDelay(getDelayForCurrentLevel());
     }
 
     private void saveFinalScore() {
+        // Makes sure the score is saved only one time
         if (scoreSaved) {
             return;
         }
@@ -433,6 +476,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
     }
 
     private void returnToMenu() {
+        // Stops the game and returns to the login/menu screen
         if (gameLoop != null) {
             gameLoop.stop();
         }
@@ -462,6 +506,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
 
         repaint();
 
+        // When the game ends, stop the timer and save the score
         if (gameOver) {
             gameLoop.stop();
             saveFinalScore();
@@ -470,6 +515,7 @@ public class SnakeGamePanel extends JPanel implements ActionListener, KeyListene
 
     @Override
     public void keyPressed(KeyEvent e) {
+        // Arrow keys control the snake direction
         if (e.getKeyCode() == KeyEvent.VK_UP && velocityY != 1) {
             velocityX = 0;
             velocityY = -1;
