@@ -1,29 +1,24 @@
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
-import java.awt.Component;
-
-import javax.swing.*;
 public class App {
 
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            int boardWidth = 600;
+            int boardHeight = 600;
 
-	public static void main(String[] args) throws Exception {
-		int boardWidth = 600;
-		int boardHeight = boardWidth;
-		
-		JFrame frame = new JFrame("Snake");
-		frame.setVisible(true);
-		frame.setSize(boardWidth, boardHeight);
-		frame.setLocationRelativeTo(null);
-		frame.setResizable(false);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		SnakeGamePanel snakeGame = new SnakeGamePanel(boardWidth, boardHeight);
-		MenuWindowPanel menu = new MenuWindowPanel();
-		
-		//frame.add(menu);
-		frame.add(snakeGame);
-		frame.pack();
-		snakeGame.requestFocus();
-	}
-	
+            JFrame frame = new JFrame("Snake");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setResizable(false);
+            frame.setLocationRelativeTo(null);
 
+            MenuWindowPanel menu = new MenuWindowPanel(frame, boardWidth, boardHeight);
+
+            frame.setContentPane(menu);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
+    }
 }
